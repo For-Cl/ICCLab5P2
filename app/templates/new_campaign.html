@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% block title %}Nueva Campaña - Marketing AI Suite{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="form-container">
+        <div class="form-header">
+            <h1 class="form-title">
+                <span class="step-badge">Paso 1</span>
+                ✨ Nueva Campaña de Marketing
+            </h1>
+            <p class="form-subtitle">
+                Sube una foto de tu empresa/producto y la IA generará 3 guiones creativos diferentes.
+            </p>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" class="campaign-form" id="campaignForm">
+            <div class="form-group">
+                <label for="company_name" class="form-label">
+                    🏢 Nombre de la Empresa
+                </label>
+                <input type="text" id="company_name" name="company_name"
+                       class="form-input" placeholder="Ej: TechVision, Café Aroma..."
+                       required maxlength="200" autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label for="description" class="form-label">
+                    📋 Descripción (opcional)
+                </label>
+                <textarea id="description" name="description"
+                          class="form-input form-textarea"
+                          placeholder="Describe brevemente tu empresa, producto o servicio..."
+                          rows="3" maxlength="500"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    📸 Foto del Producto / Marca
+                </label>
+                <div class="upload-area" id="uploadArea">
+                    <input type="file" id="photo" name="photo"
+                           accept="image/*" required class="file-input">
+                    <div class="upload-content" id="uploadContent">
+                        <div class="upload-icon">📷</div>
+                        <p class="upload-text">Arrastra una imagen aquí o haz clic para seleccionar</p>
+                        <p class="upload-hint">PNG, JPG, GIF, WebP — Máximo 16 MB</p>
+                    </div>
+                    <div class="upload-preview" id="uploadPreview" style="display:none">
+                        <img id="previewImage" alt="Preview">
+                        <button type="button" class="btn btn-sm btn-danger remove-preview"
+                                onclick="removePreview()">✕ Quitar</button>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg btn-full" id="submitBtn">
+                🤖 Generar Guiones con IA
+            </button>
+        </form>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('photo');
+    const uploadContent = document.getElementById('uploadContent');
+    const uploadPreview = document.getElementById('uploadPreview');
+    const previewImage = document.getElementById('previewImage');
+
+    uploadArea.addEventListener('click', () => fileInput.click());
+
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('drag-over');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('drag-over');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('drag-over');
+        if (e.dataTransfer.files.length) {
+            fileInput.files = e.dataTransfer.files;
+            showPreview(e.dataTransfer.files[0]);
+        }
+    });
+
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files.length) {
+            showPreview(fileInput.files[0]);
+        }
+    });
+
+    function showPreview(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            previewImage.src = e.target.result;
+            uploadContent.style.display = 'none';
+            uploadPreview.style.display = 'flex';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function removePreview() {
+        fileInput.value = '';
+        uploadContent.style.display = 'flex';
+        uploadPreview.style.display = 'none';
+        previewImage.src = '';
+    }
+
+    document.getElementById('campaignForm').addEventListener('submit', function() {
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '⏳ Generando guiones con IA...';
+        btn.classList.add('btn-loading');
+    });
+</script>
+{% endblock %}

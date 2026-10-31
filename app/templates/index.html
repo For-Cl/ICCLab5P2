@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block title %}Marketing AI Suite - Dashboard{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-content">
+        <h1 class="hero-title">
+            <span class="hero-emoji">🚀</span>
+            Marketing con <span class="gradient-text">Inteligencia Artificial</span>
+        </h1>
+        <p class="hero-subtitle">
+            Sube una foto, genera guiones creativos, crea contenido visual y publícalo en redes sociales.
+            Todo potenciado por IA.
+        </p>
+        <a href="{{ url_for('main.new_campaign') }}" class="btn btn-primary btn-lg pulse-animation">
+            ✨ Crear Nueva Campaña
+        </a>
+    </div>
+</section>
+
+<section class="section">
+    <div class="section-header">
+        <h2 class="section-title">📊 Tus Campañas</h2>
+        <span class="badge badge-primary">{{ campaigns|length }} total</span>
+    </div>
+
+    {% if campaigns %}
+    <div class="campaigns-grid">
+        {% for campaign in campaigns %}
+        <div class="campaign-card" style="animation-delay: {{ loop.index0 * 0.1 }}s">
+            <div class="card-image">
+                <img src="{{ url_for('static', filename='uploads/' + campaign.original_photo) }}"
+                     alt="Foto de {{ campaign.company_name }}" loading="lazy">
+                <div class="card-overlay">
+                    <span class="card-date">{{ campaign.created_at.strftime('%d/%m/%Y') }}</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <h3 class="card-title">{{ campaign.company_name }}</h3>
+                {% if campaign.description %}
+                <p class="card-description">{{ campaign.description[:100] }}{% if campaign.description|length > 100 %}...{% endif %}</p>
+                {% endif %}
+                <div class="card-stats">
+                    <span class="stat">
+                        <span class="stat-icon">📝</span>
+                        {{ campaign.scripts|length }} guiones
+                    </span>
+                    <span class="stat">
+                        <span class="stat-icon">📸</span>
+                        {{ campaign.generated_content|length }} contenidos
+                    </span>
+                </div>
+                <div class="card-actions">
+                    <a href="{{ url_for('main.view_campaign', campaign_id=campaign.id) }}" class="btn btn-secondary btn-sm">
+                        Ver Campaña →
+                    </a>
+                    <form method="POST" action="{{ url_for('main.delete_campaign', campaign_id=campaign.id) }}"
+                          onsubmit="return confirm('¿Eliminar esta campaña?')" style="display:inline">
+                        <button type="submit" class="btn btn-danger btn-sm">🗑️</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">🎨</div>
+        <h3>No hay campañas todavía</h3>
+        <p>Crea tu primera campaña de marketing con IA</p>
+        <a href="{{ url_for('main.new_campaign') }}" class="btn btn-primary">
+            ✨ Crear Primera Campaña
+        </a>
+    </div>
+    {% endif %}
+</section>
+
+<!-- Workflow -->
+<section class="section workflow-section">
+    <h2 class="section-title">⚙️ ¿Cómo funciona?</h2>
+    <div class="workflow-grid">
+        <div class="workflow-step">
+            <div class="step-number">1</div>
+            <div class="step-icon">📸</div>
+            <h3>Sube una Foto</h3>
+            <p>Sube la foto de tu producto o marca para iniciar la campaña.</p>
+        </div>
+        <div class="workflow-arrow">→</div>
+        <div class="workflow-step">
+            <div class="step-number">2</div>
+            <div class="step-icon">📝</div>
+            <h3>3 Guiones IA</h3>
+            <p>La IA genera 3 guiones creativos con diferentes tonos.</p>
+        </div>
+        <div class="workflow-arrow">→</div>
+        <div class="workflow-step">
+            <div class="step-number">3</div>
+            <div class="step-icon">🎬</div>
+            <h3>Genera Contenido</h3>
+            <p>Se crean 3 fotos y 1 video basados en el guion elegido.</p>
+        </div>
+        <div class="workflow-arrow">→</div>
+        <div class="workflow-step">
+            <div class="step-number">4</div>
+            <div class="step-icon">📱</div>
+            <h3>Publica</h3>
+            <p>Publica el contenido en Instagram o TikTok.</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

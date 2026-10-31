@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% block title %}{{ campaign.company_name }} - Marketing AI Suite{% endblock %}
+
+{% block content %}
+<section class="section">
+    <!-- Header de campaña -->
+    <div class="campaign-header">
+        <div class="campaign-info">
+            <a href="{{ url_for('main.index') }}" class="back-link">← Volver al Dashboard</a>
+            <h1 class="campaign-name">{{ campaign.company_name }}</h1>
+            {% if campaign.description %}
+            <p class="campaign-desc">{{ campaign.description }}</p>
+            {% endif %}
+            <span class="badge badge-secondary">
+                📅 {{ campaign.created_at.strftime('%d/%m/%Y %H:%M') }}
+            </span>
+        </div>
+        <div class="campaign-photo">
+            <img src="{{ url_for('static', filename='uploads/' + campaign.original_photo) }}"
+                 alt="Foto original de {{ campaign.company_name }}">
+            <span class="photo-label">Foto Original</span>
+        </div>
+    </div>
+</section>
+
+<!-- Paso 2: Guiones generados -->
+<section class="section">
+    <div class="section-header">
+        <h2 class="section-title">
+            <span class="step-badge">Paso 2</span>
+            📝 Guiones Generados por IA
+        </h2>
+        <p class="section-desc">Selecciona el guion que mejor represente tu marca</p>
+    </div>
+
+    <div class="scripts-grid">
+        {% for script in scripts %}
+        <div class="script-card {% if script.is_selected %}script-selected{% endif %}">
+            <div class="script-header">
+                <span class="tone-badge tone-{{ script.tone }}">
+                    {% if script.tone == 'profesional' %}🎯 Profesional
+                    {% elif script.tone == 'divertido' %}🎉 Divertido
+                    {% elif script.tone == 'emocional' %}❤️ Emocional
+                    {% endif %}
+                </span>
+                {% if script.is_selected %}
+                <span class="selected-badge">✅ Seleccionado</span>
+                {% endif %}
+            </div>
+            <h3 class="script-title">{{ script.title }}</h3>
+            <div class="script-content">
+                {{ script.content | replace('\n', '<br>') | safe }}
+            </div>
+            {% if not script.is_selected %}
+            <form method="POST" action="{{ url_for('main.select_script', campaign_id=campaign.id, script_id=script.id) }}">
+                <button type="submit" class="btn btn-primary btn-full btn-select"
+                        onclick="this.disabled=true; this.innerHTML='⏳ Generando contenido...'; this.form.submit();">
+                    🎬 Seleccionar y Generar Contenido
+                </button>
+            </form>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Paso 3 y 4: Contenido generado + Publicar -->
+{% if generated %}
+<section class="section">
+    <div class="section-header">
+        <h2 class="section-title">
+            <span class="step-badge">Paso 3</span>
+            🎬 Contenido Generado
+        </h2>
+    </div>
+
+    <!-- Fotos generadas -->
+    <h3 class="subsection-title">📸 Fotos de Marketing (3)</h3>
+    <div class="generated-grid">
+        {% for item in generated if item.content_type == 'photo' %}
+        <div class="generated-card">
+            <img src="{{ url_for('static', filename='generated/' + item.file_path) }}"
+                 alt="Foto generada {{ loop.index }}" loading="lazy">
+            <div class="generated-info">
+                <span class="content-type-badge">📸 Foto {{ loop.index }}</span>
+                {% if item.published %}
+                <span class="published-badge">
+                    ✅ Publicado en {{ item.published_platform | capitalize }}
+                </span>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Video generado -->
+    <h3 class="subsection-title">🎬 Video de Marketing</h3>
+    <div class="video-container">
+        {% for item in generated if item.content_type == 'video' %}
+        <div class="video-card">
+            <img src="{{ url_for('static', filename='generated/' + item.file_path) }}"
+                 alt="Video generado" class="video-preview">
+            <div class="generated-info">
+                <span class="content-type-badge">🎬 Video (GIF animado)</span>
+                {% if item.published %}
+                <span class="published-badge">
+                    ✅ Publicado en {{ item.published_platform | capitalize }}
+                </span>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Paso 4: Publicar -->
+<section class="section">
+    <div class="section-header">
+        <h2 class="section-title">
+            <span class="step-badge">Paso 4</span>
+            📱 Publicar en Redes Sociales
+        </h2>
+    </div>
+
+    {% set unpublished = generated | selectattr('published', 'false') | list %}
+
+    {% if unpublished | length > 0 %}
+    <div class="publish-container">
+        <form method="POST" action="{{ url_for('main.publish', campaign_id=campaign.id) }}" class="publish-form">
+            <div class="platform-selector">
+                <label class="platform-option">
+                    <input type="radio" name="platform" value="instagram" checked>
+                    <div class="platform-card">
+                        <span class="platform-icon">📷</span>
+                        <span class="platform-name">Instagram</span>
+                    </div>
+                </label>
+                <label class="platform-option">
+                    <input type="radio" name="platform" value="tiktok">
+                    <div class="platform-card">
+                        <span class="platform-icon">🎵</span>
+                        <span class="platform-name">TikTok</span>
+                    </div>
+                </label>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg btn-full"
+                    onclick="this.disabled=true; this.innerHTML='📤 Publicando...'; this.form.submit();">
+                🚀 Publicar Todo el Contenido
+            </button>
+        </form>
+    </div>
+    {% else %}
+    <div class="publish-done">
+        <div class="done-icon">🎉</div>
+        <h3>¡Todo publicado!</h3>
+        <p>Todo el contenido ha sido publicado exitosamente.</p>
+    </div>
+    {% endif %}
+</section>
+{% endif %}
+{% endblock %}
